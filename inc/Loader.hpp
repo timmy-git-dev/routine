@@ -1,9 +1,8 @@
 #pragma once
 #include "Task.hpp"
-#include <vector>
 
-namespace loader
+namespace data
 {
-    void              save_tasks(std::string _saveFile, std::vector<Task> _tasks);
-    std::vector<Task> load_tasks(std::string _saveFile                          );
+    void read (std::string _file, Task &_tasks);
+    void write(std::string _file, Task &_tasks);
 };

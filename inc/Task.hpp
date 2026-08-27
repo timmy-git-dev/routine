@@ -8,7 +8,7 @@ struct Task
     std::string       name;
     std::string       description;
     int               status;
+    std::vector<Task> subtasks;
     Time              startTime;
     Time              endTime;
-    std::vector<Task> subtasks;
 };

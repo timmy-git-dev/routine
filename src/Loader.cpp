@@ -1,20 +1,85 @@
 #include "Loader.hpp"
+#include "Task.hpp"
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
-namespace loader
+namespace data
 {
-    int valid_subtask_count(const Task &_task)
+    constexpr int read_digits(const std::string &_line, const size_t _index, const size_t _length)
     {
-        int _count = 0;
-        for (const Task& _subtask : _task.subtasks)
+        int _mult = 1;
+        int _digits = 0;
+        for (int _i = 0; _i < _length; ++_i)
         {
-            _count += !_subtask.name.empty();
+            _digits += _line[_index + _length - _mult - 1] * _mult;
+            _mult *= 10;
         }
 
-        return _count;
+        return _digits;
     }
+    Time read_time(const std::string &_line, const size_t _index)
+    {
+        return Time
+        {
+            .year   = read_digits(_line, _index + 0, 4),
+            .month  = read_digits(_line, _index + 0, 2),
+            .day    = read_digits(_line, _index + 0, 2),
+            .hour   = read_digits(_line, _index + 0, 2),
+            .minute = read_digits(_line, _index + 0, 2),
+        };
+    }
+    std::vector<size_t> read_line(const std::string &_line)
+    {
+        size_t _currentIndex = 0;
+        std::vector<size_t> _indices;
+
+        while (_currentIndex != std::string::npos)
+        {
+            _currentIndex = _line.find_first_of('|', _currentIndex);
+            _indices.push_back(_currentIndex);
+        }
+
+        return _indices;
+    }
+    Task read_task(std::ifstream& _file, Task &_task)
+    {
+        std::string _line;
+        std::getline(_file, _line);
+        std::vector<size_t> _indices = read_line(_line);
+
+
+        _task.name        = _line.substr(0              , _indices[0]              );
+        _task.description = _line.substr(_indices[0] + 1, _indices[1] - _indices[0]);
+        _task.status      = read_digits(_line, _indices[1] + 1, _indices[2] - _indices[1]);
+        _task.subtasks    = std::vector<Task>(read_digits(_line, _indices[2] + 1, _indices[3] - _indices[2]));
+        _task.startTime   = Time
+        {
+            .year   = read_digits(_line, _indices[ 3] + 1, _indices[ 4] - _indices[ 3]),
+            .month  = read_digits(_line, _indices[ 4] + 1, _indices[ 5] - _indices[ 4]),
+            .day    = read_digits(_line, _indices[ 5] + 1, _indices[ 6] - _indices[ 5]),
+            .hour   = read_digits(_line, _indices[ 6] + 1, _indices[ 7] - _indices[ 6]),
+            .minute = read_digits(_line, _indices[ 7] + 1, _indices[ 8] - _indices[ 7]),
+        };
+        _task.endTime     = Time
+        {
+            .year   = read_digits(_line, _indices[ 8] + 1, _indices[ 9] - _indices[ 8]),
+            .month  = read_digits(_line, _indices[ 9] + 1, _indices[10] - _indices[ 9]),
+            .day    = read_digits(_line, _indices[10] + 1, _indices[11] - _indices[10]),
+            .hour   = read_digits(_line, _indices[11] + 1, _indices[12] - _indices[11]),
+            .minute = read_digits(_line, _indices[12] + 1, _indices[13] - _indices[12]),
+        };
+
+        for (Task &_subtask : _task.subtasks)
+        {
+            read_task(_file, _subtask);
+        }
+
+        return _task;
+    }
+
+
 
     void print_task(std::ofstream &_file, const Task &_task)
     {
@@ -22,8 +87,6 @@ namespace loader
         {
             return;
         }
-
-        int _taskCount = valid_subtask_count(_task);
 
         if (_task.startTime.hour   < 10) {_file << '0';} _file << _task.startTime.hour;
         if (_task.startTime.minute < 10) {_file << '0';} _file << _task.startTime.minute;
@@ -33,7 +96,7 @@ namespace loader
         _file << ' ';
         _file << _task.status;
         _file << ' ';
-        if (_taskCount < 10) {_file << '0';} _file << _taskCount;
+        if (_task.subtasks.size() < 10) {_file << '0';} _file << _task.subtasks.size();
         _file << ' ';
         _file << '"' << _task.name        << '"';
         _file << ' ';
