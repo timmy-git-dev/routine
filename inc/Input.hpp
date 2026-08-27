@@ -4,6 +4,10 @@ namespace input
 {
     enum class KEYBIND : char
     {
+        NEW    = 'n',
+        REMOVE = 'r',
+        EDIT   = 'e',
+
         UP      = 0, // up-arrow.
         DOWN    = 1, // down-arrow.
 
@@ -12,6 +16,7 @@ namespace input
 
         CONFIRM = 4, // enter/newline.
         DELETE  = 5, // delete/backspace.
+
 
         SPACE             = ' ',
 
