@@ -1,11 +1,7 @@
-#include "Loader.hpp"
-#include "Task.hpp"
-#include <format>
+#include "Data.hpp"
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <string_view>
-#include <vector>
+#include "Task.hpp"
 
 namespace data
 {
@@ -14,15 +10,13 @@ namespace data
         size_t _curr = 0;
         std::vector<std::string_view> _args;
 
-        while (_curr != std::string::npos)
+        do
         {
-            ++_curr;
             size_t _next = _line.find_first_of('|', _curr);
-
             _args.push_back(std::string_view(_line.data() + _curr, _next - _curr));
-
             _curr = _next;
         }
+        while (_curr++ != std::string::npos);
 
         return _args;
     }
@@ -32,7 +26,7 @@ namespace data
         int _digits = 0;
         for (size_t _i = 0; _i < _text.size(); ++_i)
         {
-            _digits += _text[_text.size() - _i - 1] * _mult;
+            _digits += (_text[_text.size() - _i - 1] - '0') * _mult;
             _mult *= 10;
         }
 
@@ -69,7 +63,10 @@ namespace data
         _task.startTime   = read_time(_args[ 4], _args[ 5], _args[ 6], _args[ 7], _args[ 8]);
         _task.endTime     = read_time(_args[ 9], _args[10], _args[11], _args[12], _args[13]);
 
-        for (Task &_subtask : _task.subtasks) read_task(_file, _subtask);
+        for (Task &_subtask : _task.subtasks)
+        {
+            read_task(_file, _subtask);
+        }
 
         return _task;
     }
@@ -93,14 +90,14 @@ namespace data
         }
     }
 
-    void read(std::string  _input, Task &_task)
+    void read (std::string _input , Task &_tasks)
     {
         std::ifstream _file = std::ifstream(_input);
-        read_task(_file, _task);
+        read_task(_file, _tasks);
     }
-    void write(std::string _output, Task &_task)
+    void write(std::string _output, Task &_tasks)
     {
         std::ofstream _file = std::ofstream(_output, std::ios::trunc);
-        print_task(_file, _task);
+        print_task(_file, _tasks);
     }
 };

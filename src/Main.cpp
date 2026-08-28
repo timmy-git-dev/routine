@@ -1,13 +1,11 @@
-#include "Display.hpp"
-#include "Loader.hpp"
-#include "Input.hpp"
-#include <vector>
+#include "Data.hpp"
 
 int main()
 {
-    input::set_single_input();
-    std::vector<Task> _tasks = loader::load_tasks("testing.txt"        );
+    Task _tasks;
+    data::read ("tasks", _tasks);
 
-    display::begin(_tasks);
-    loader::save_tasks("testing.txt", _tasks);
+
+
+    data::write("tasks", _tasks);
 }
