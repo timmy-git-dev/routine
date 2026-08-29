@@ -3,11 +3,48 @@
 #include "Terminal.hpp"
 #include "Input.hpp"
 #include "Time.hpp"
+#include <climits>
 #include <cstddef>
 #include <vector>
 
 namespace menu
 {
+    enum class MENU_CASE : int
+    {
+        BACK = -1,
+        STAY =  0,
+        NEXT =  1,
+    };
+
+    MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
+    {
+        switch (_input)
+        {
+            case input::KEYBIND::UP:                                                 return MENU_CASE::STAY;
+            case input::KEYBIND::DOWN:                                               return MENU_CASE::STAY;
+            case input::KEYBIND::CONFIRM:                                            return MENU_CASE::STAY;
+
+            case input::KEYBIND::NEXT:                                               return MENU_CASE::NEXT;
+            case input::KEYBIND::BACK:                                               return MENU_CASE::BACK;
+
+            case input::KEYBIND::DELETE:  if (_str.size() > 0) {_str.pop_back();}    return MENU_CASE::STAY;
+            default:                      _str.push_back(static_cast<char>(_input)); return MENU_CASE::STAY;
+        }
+    }
+    MENU_CASE edit_num(int &_num, input::KEYBIND _input, int _min, int _max)
+    {
+        switch (_input)
+        {
+            case input::KEYBIND::UP:   if (_num++ == _max) {_num = _min;} return MENU_CASE::STAY;
+            case input::KEYBIND::DOWN: if (_num-- == _min) {_num = _max;} return MENU_CASE::STAY;
+
+            case input::KEYBIND::NEXT: return MENU_CASE::NEXT;
+            case input::KEYBIND::BACK: return MENU_CASE::BACK;
+
+            default:                   return MENU_CASE::STAY;
+        }
+    }
+
     void print_parent_task(const Task &_task)
     {
         terminal::print
@@ -63,8 +100,8 @@ namespace menu
                 case input::KEYBIND::NEW:     new_task(_task);                                                                               break;
                 case input::KEYBIND::REMOVE:  remove_task(_task);                                                                            break;
                 case input::KEYBIND::EDIT:    edit_task(_task.subtasks[_selectedSubtask]);                                                   break;
-                case input::KEYBIND::UP:      if (++_selectedSubtask == _task.subtasks.size()) _selectedSubtask = 0;                         break;
-                case input::KEYBIND::DOWN:    if (--_selectedSubtask == (size_t)-1           ) _selectedSubtask = _task.subtasks.size() - 1; break;
+                case input::KEYBIND::UP:      if (--_selectedSubtask == (size_t)-1           ) _selectedSubtask = _task.subtasks.size() - 1; break;
+                case input::KEYBIND::DOWN:    if (++_selectedSubtask == _task.subtasks.size()) _selectedSubtask = 0;                         break;
                 case input::KEYBIND::NEXT:    if (_task.subtasks.size() > 0) display_task(_task.subtasks[_selectedSubtask]);                 break;
                 case input::KEYBIND::BACK:                                                                                                   return;
 
@@ -92,24 +129,16 @@ namespace menu
         END_HOUR    ,
         END_MINUTE  ,
 
-        CONFIRM,
+        CONFIRM     ,
     };
-    enum class MENU_CASE : int
-    {
-        BACK = -1,
-        STAY =  0,
-        NEXT =  1,
-    };
-
     void print_new_task(const Task &_task, const NEW_STATE _state)
     {
         terminal::print
         (
-            "%^"
-            "NAME:        {}\n"
-            "DESCRIPTION: {}\n"
-            "START:       {:04}/{:02}/{:02} {:02}:{:02}\n"
-            "END:         {:04}/{:02}/{:02} {:02}:{:02}\n",
+            "%^NAME:        {}{}\n"
+            "%^DESCRIPTION: {}{}\n"
+            "%^START:       {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n"
+            "%^END:         {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n",
             _state == NEW_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
             _state == NEW_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
 
@@ -126,59 +155,6 @@ namespace menu
             _state == NEW_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
         );
     }
-    MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
-    {
-        switch (_input)
-        {
-            case input::KEYBIND::UP:                                                 return MENU_CASE::STAY;
-            case input::KEYBIND::DOWN:                                               return MENU_CASE::STAY;
-            case input::KEYBIND::CONFIRM:                                            return MENU_CASE::STAY;
-
-            case input::KEYBIND::NEXT:                                               return MENU_CASE::NEXT;
-            case input::KEYBIND::BACK:                                               return MENU_CASE::BACK;
-
-            case input::KEYBIND::DELETE:  if (_str.size() > 0) {_str.pop_back();}    return MENU_CASE::STAY;
-            default:                      _str.push_back(static_cast<char>(_input)); return MENU_CASE::STAY;
-        }
-    }
-    MENU_CASE edit_num(int &_num, input::KEYBIND _input)
-    {
-        switch (_input)
-        {
-            case input::KEYBIND::UP:   _num += 1; return MENU_CASE::STAY;
-            case input::KEYBIND::DOWN: _num -= 1; return MENU_CASE::STAY;
-
-            case input::KEYBIND::NEXT: return MENU_CASE::NEXT;
-            case input::KEYBIND::BACK: return MENU_CASE::BACK;
-
-            default:                   return MENU_CASE::STAY;
-        }
-    }
-    MENU_CASE new_name(Task &_task)
-    {
-        while (true)
-        {
-            terminal::clear();
-            print_new_task(_task, NEW_STATE::NAME);
-
-            input::KEYBIND _input = input::read();
-            switch (_input)
-            {
-                case input::KEYBIND::REMOVE:  break;
-                case input::KEYBIND::EDIT:    break;
-                case input::KEYBIND::UP:      break;
-                case input::KEYBIND::DOWN:    break;
-                case input::KEYBIND::NEW:     break;
-                case input::KEYBIND::CONFIRM: break;
-
-                case input::KEYBIND::NEXT:    goto DESCRIPTION;
-                case input::KEYBIND::BACK:    return;
-
-                case input::KEYBIND::DELETE:  /* remove char */ break;
-                default:                      /* add    char */ break;
-            }
-        }
-    }
     void new_task(Task &_parentTask)
     {
         Task _task
@@ -192,17 +168,29 @@ namespace menu
         };
 
         NEW_STATE _state = NEW_STATE::NAME;
-
         while (true)
         {
+            terminal::clear();
+            print_new_task(_task, _state);
+
+            input::KEYBIND _input = input::read();
+
             switch (_state)
             {
-                case NEW_STATE::CANCEL:      return;
-                case NEW_STATE::NAME:        new_name(_task); break;
-                case NEW_STATE::DESCRIPTION: break;
-                case NEW_STATE::START:       break;
-                case NEW_STATE::END:         break;
-                case NEW_STATE::CONFIRM:     break;
+                case NEW_STATE::CANCEL:       return;
+                case NEW_STATE::NAME:         _state = (NEW_STATE)((int)_state + (int)edit_str(_task.name            , _input)); break;
+                case NEW_STATE::DESCRIPTION:  _state = (NEW_STATE)((int)_state + (int)edit_str(_task.description     , _input)); break;
+                case NEW_STATE::START_YEAR:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
+                case NEW_STATE::START_MONTH:  _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
+                case NEW_STATE::START_DAY:    _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
+                case NEW_STATE::START_HOUR:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
+                case NEW_STATE::START_MINUTE: _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
+                case NEW_STATE::END_YEAR:     _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
+                case NEW_STATE::END_MONTH:    _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
+                case NEW_STATE::END_DAY:      _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
+                case NEW_STATE::END_HOUR:     _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
+                case NEW_STATE::END_MINUTE:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); break;
+                case NEW_STATE::CONFIRM:      _parentTask.subtasks.push_back(_task); return; // Put in order based on start time.
             }
         }
     }
