@@ -15,6 +15,25 @@ namespace menu
         STAY =  0,
         NEXT =  1,
     };
+    enum class TASK_STATE : int
+    {
+        CANCEL  = -1,
+
+        NAME        ,
+        DESCRIPTION ,
+        START_YEAR  ,
+        START_MONTH ,
+        START_DAY   ,
+        START_HOUR  ,
+        START_MINUTE,
+        END_YEAR    ,
+        END_MONTH   ,
+        END_DAY     ,
+        END_HOUR    ,
+        END_MINUTE  ,
+
+        CONFIRM     ,
+    };
 
     MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
     {
@@ -112,26 +131,7 @@ namespace menu
         }
     }
 
-    enum class NEW_STATE : int
-    {
-        CANCEL  = -1,
-
-        NAME        ,
-        DESCRIPTION ,
-        START_YEAR  ,
-        START_MONTH ,
-        START_DAY   ,
-        START_HOUR  ,
-        START_MINUTE,
-        END_YEAR    ,
-        END_MONTH   ,
-        END_DAY     ,
-        END_HOUR    ,
-        END_MINUTE  ,
-
-        CONFIRM     ,
-    };
-    void print_new_task(const Task &_task, const NEW_STATE _state)
+    void print_new_task(const Task &_task, const TASK_STATE _state)
     {
         terminal::print
         (
@@ -139,25 +139,26 @@ namespace menu
             "%^DESCRIPTION: {}{}\n"
             "%^START:       {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n"
             "%^END:         {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n",
-            _state == NEW_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
-            _state == NEW_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
+            _state == TASK_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
+            _state == TASK_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
 
-            _state == NEW_STATE::START_YEAR   ? "%^%*" : "%^", _task.startTime.year  ,
-            _state == NEW_STATE::START_MONTH  ? "%^%*" : "%^", _task.startTime.month ,
-            _state == NEW_STATE::START_DAY    ? "%^%*" : "%^", _task.startTime.day   ,
-            _state == NEW_STATE::START_HOUR   ? "%^%*" : "%^", _task.startTime.hour  ,
-            _state == NEW_STATE::START_MINUTE ? "%^%*" : "%^", _task.startTime.minute,
+            _state == TASK_STATE::START_YEAR   ? "%^%*" : "%^", _task.startTime.year  ,
+            _state == TASK_STATE::START_MONTH  ? "%^%*" : "%^", _task.startTime.month ,
+            _state == TASK_STATE::START_DAY    ? "%^%*" : "%^", _task.startTime.day   ,
+            _state == TASK_STATE::START_HOUR   ? "%^%*" : "%^", _task.startTime.hour  ,
+            _state == TASK_STATE::START_MINUTE ? "%^%*" : "%^", _task.startTime.minute,
 
-            _state == NEW_STATE::END_YEAR     ? "%^%*" : "%^", _task.endTime.year  ,
-            _state == NEW_STATE::END_MONTH    ? "%^%*" : "%^", _task.endTime.month ,
-            _state == NEW_STATE::END_DAY      ? "%^%*" : "%^", _task.endTime.day   ,
-            _state == NEW_STATE::END_HOUR     ? "%^%*" : "%^", _task.endTime.hour  ,
-            _state == NEW_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
+            _state == TASK_STATE::END_YEAR     ? "%^%*" : "%^", _task.endTime.year  ,
+            _state == TASK_STATE::END_MONTH    ? "%^%*" : "%^", _task.endTime.month ,
+            _state == TASK_STATE::END_DAY      ? "%^%*" : "%^", _task.endTime.day   ,
+            _state == TASK_STATE::END_HOUR     ? "%^%*" : "%^", _task.endTime.hour  ,
+            _state == TASK_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
         );
     }
     void new_task(Task &_parentTask)
     {
-        Task _task
+        TASK_STATE _state = TASK_STATE::NAME;
+        Task       _task
         {
             .name        = "",
             .description = "",
@@ -167,7 +168,6 @@ namespace menu
             .endTime     = Time::now(),
         };
 
-        NEW_STATE _state = NEW_STATE::NAME;
         while (true)
         {
             terminal::clear();
@@ -177,29 +177,95 @@ namespace menu
 
             switch (_state)
             {
-                case NEW_STATE::CANCEL:       return;
-                case NEW_STATE::NAME:         _state = (NEW_STATE)((int)_state + (int)edit_str(_task.name            , _input)); break;
-                case NEW_STATE::DESCRIPTION:  _state = (NEW_STATE)((int)_state + (int)edit_str(_task.description     , _input)); break;
-                case NEW_STATE::START_YEAR:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
-                case NEW_STATE::START_MONTH:  _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
-                case NEW_STATE::START_DAY:    _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
-                case NEW_STATE::START_HOUR:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
-                case NEW_STATE::START_MINUTE: _state = (NEW_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
-                case NEW_STATE::END_YEAR:     _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
-                case NEW_STATE::END_MONTH:    _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
-                case NEW_STATE::END_DAY:      _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
-                case NEW_STATE::END_HOUR:     _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
-                case NEW_STATE::END_MINUTE:   _state = (NEW_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); break;
-                case NEW_STATE::CONFIRM:      _parentTask.subtasks.push_back(_task); return; // Put in order based on start time.
+                case TASK_STATE::CANCEL:                                                                                                       return;
+                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input));             break;
+                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input));             break;
+                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
+                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
+                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
+                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
+                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
+                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
+                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); break;
+                case TASK_STATE::CONFIRM:
+                {
+                    for (int _i = 0; _i < _parentTask.subtasks.size(); ++_i)
+                    {
+                        if (_task.startTime < _parentTask.subtasks[_i].startTime)
+                        {
+                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
+                            return;
+                        }
+                    }
+
+                    _parentTask.subtasks.push_back(_task);
+                    return;
+                }
             }
         }
     }
-    void remove_task(Task &_task)
+
+    void remove_task(Task &_parentTask, const size_t _index)
     {
-        // ...
+        _parentTask.subtasks.erase(_index);
     }
-    void edit_task(Task &_task)
+
+    void print_edit_task(const Task &_task, const TASK_STATE _state)
     {
-        // ...
+        terminal::print
+        (
+            "%^NAME:        {}{}\n"
+            "%^DESCRIPTION: {}{}\n"
+            "%^START:       {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n"
+            "%^END:         {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n",
+            _state == TASK_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
+            _state == TASK_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
+
+            _state == TASK_STATE::START_YEAR   ? "%^%*" : "%^", _task.startTime.year  ,
+            _state == TASK_STATE::START_MONTH  ? "%^%*" : "%^", _task.startTime.month ,
+            _state == TASK_STATE::START_DAY    ? "%^%*" : "%^", _task.startTime.day   ,
+            _state == TASK_STATE::START_HOUR   ? "%^%*" : "%^", _task.startTime.hour  ,
+            _state == TASK_STATE::START_MINUTE ? "%^%*" : "%^", _task.startTime.minute,
+
+            _state == TASK_STATE::END_YEAR     ? "%^%*" : "%^", _task.endTime.year  ,
+            _state == TASK_STATE::END_MONTH    ? "%^%*" : "%^", _task.endTime.month ,
+            _state == TASK_STATE::END_DAY      ? "%^%*" : "%^", _task.endTime.day   ,
+            _state == TASK_STATE::END_HOUR     ? "%^%*" : "%^", _task.endTime.hour  ,
+            _state == TASK_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
+        );
+    }
+    void edit_task(Task &_taskToEdit)
+    {
+        TASK_STATE _state = TASK_STATE::NAME;
+        Task       _task  = _taskToEdit;
+        
+        while (true)
+        {
+            terminal::clear();
+            print_edit_task(_task, _state);
+
+            input::KEYBIND _input = input::read();
+
+            switch (_state)
+            {
+                case TASK_STATE::CANCEL:                                                                                                       return;
+                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input            )); break;
+                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input            )); break;
+                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
+                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
+                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
+                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
+                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
+                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
+                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); break;
+                case TASK_STATE::CONFIRM:      _taskToEdit = _task;                                                                            return;
+            }
+        }
     }
 };
