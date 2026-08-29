@@ -1,22 +1,15 @@
 #pragma once
+#include <tuple>
 
 struct Time
 {
-    using u64 = unsigned long; // TODO: add alias file.
-    using u32 = unsigned long;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
 
-private:
-    u64 date_;
-
-    u32 year  () const;
-    u32 month () const;
-    u32 day   () const;
-    u32 hour  () const;
-    u32 minute() const;
-
-    Time(int _year, int _month, int _day, int _hour, int _minute);
-
-    bool operator> (const Time& _time) const;
-    bool operator< (const Time& _time) const;
-    bool operator==(const Time& _time) const;
+    bool operator> (const Time& _time) const {return std::tie(year, month, day, hour, minute) >  std::tie(_time.year, _time.month, _time.day, _time.hour, _time.minute);}
+    bool operator< (const Time& _time) const {return std::tie(year, month, day, hour, minute) <  std::tie(_time.year, _time.month, _time.day, _time.hour, _time.minute);}
+    bool operator==(const Time& _time) const {return std::tie(year, month, day, hour, minute) == std::tie(_time.year, _time.month, _time.day, _time.hour, _time.minute);}
 };
