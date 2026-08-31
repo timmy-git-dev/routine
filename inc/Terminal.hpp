@@ -1,5 +1,4 @@
 #pragma once
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <string>
@@ -28,12 +27,10 @@ namespace terminal
     };
 
     inline int terminalWidth, terminalHeight;
-    inline int gapWidth     , gapHeight;
 
-    inline int currentWidth , currentHeight;
-    inline int previewWidth , previewHeight;
-    inline int subtasksWidth, subtasksHeight;
-    inline int menuWidth    , menuHeight;
+    inline int gapWidth  , gapHeight;
+    inline int panelWidth, panelHeight;
+    inline int splitPanelHeight;
 
 
     template<typename... Args>
@@ -92,12 +89,12 @@ namespace terminal
         std::cout << _output;
     }
     template<typename... Args>
-    void print(size_t _x, size_t _y, size_t _width, size_t _height, std::string _text, Args&&... _args)
+    void print(size_t _x, size_t _y, size_t _width, size_t _height, const std::string &_input, Args&&... _args)
     {
         ++_x;
         ++_y;
 
-        _text = std::vformat(_text, std::make_format_args(_args...));
+        std::string _text = std::vformat(_input, std::make_format_args(_args...));
 
         std::string _output = std::format("\033[{};{}H", _y, _x);
         _output.reserve(_text.size() * 2);
@@ -134,20 +131,20 @@ namespace terminal
                     case CODE_CHARS::BLINK:     _output += "\033[5m"; break;
                     case CODE_CHARS::STRIKE:    _output += "\033[9m"; break;
 
-                    case CODE_CHARS::WHT_DRK: _output += "\033[38;2;176;179;199m"; break;
-                    case CODE_CHARS::WHT_LIT: _output += "\033[38;2;210;214;224m"; break;
-                    case CODE_CHARS::BLK_DRK: _output += "\033[38;2;0;0;0m"; break;
-                    case CODE_CHARS::BLK_LIT: _output += "\033[38;2;112;117;141m"; break;
-                    case CODE_CHARS::RED_DRK: _output += "\033[38;2;241;44;65m"; break;
-                    case CODE_CHARS::RED_LIT: _output += "\033[38;2;251;120;94m"; break;
-                    case CODE_CHARS::YLW_DRK: _output += "\033[38;2;255;197;55m"; break;
-                    case CODE_CHARS::YLW_LIT: _output += "\033[38;2;255;233;19m"; break;
-                    case CODE_CHARS::GRN_DRK: _output += "\033[38;2;19;237;71m"; break;
-                    case CODE_CHARS::GRN_LIT: _output += "\033[38;2;86;250;49m"; break;
-                    case CODE_CHARS::BLU_DRK: _output += "\033[38;2;96;82;247m"; break;
-                    case CODE_CHARS::BLU_LIT: _output += "\033[38;2;141;131;252m"; break;
-                    case CODE_CHARS::PNK_DRK: _output += "\033[38;2;252;89;252m"; break;
-                    case CODE_CHARS::PNK_LIT: _output += "\033[38;2;252;142;252m"; break;
+                    case CODE_CHARS::WHT_DRK:   _output += "\033[38;2;176;179;199m"; break;
+                    case CODE_CHARS::WHT_LIT:   _output += "\033[38;2;210;214;224m"; break;
+                    case CODE_CHARS::BLK_DRK:   _output += "\033[38;2;0;0;0m";       break;
+                    case CODE_CHARS::BLK_LIT:   _output += "\033[38;2;112;117;141m"; break;
+                    case CODE_CHARS::RED_DRK:   _output += "\033[38;2;241;44;65m";   break;
+                    case CODE_CHARS::RED_LIT:   _output += "\033[38;2;251;120;94m";  break;
+                    case CODE_CHARS::YLW_DRK:   _output += "\033[38;2;255;197;55m";  break;
+                    case CODE_CHARS::YLW_LIT:   _output += "\033[38;2;255;233;19m";  break;
+                    case CODE_CHARS::GRN_DRK:   _output += "\033[38;2;19;237;71m";   break;
+                    case CODE_CHARS::GRN_LIT:   _output += "\033[38;2;86;250;49m";   break;
+                    case CODE_CHARS::BLU_DRK:   _output += "\033[38;2;96;82;247m";   break;
+                    case CODE_CHARS::BLU_LIT:   _output += "\033[38;2;141;131;252m"; break;
+                    case CODE_CHARS::PNK_DRK:   _output += "\033[38;2;252;89;252m";  break;
+                    case CODE_CHARS::PNK_LIT:   _output += "\033[38;2;252;142;252m"; break;
                     default: break;
                 }
 
@@ -199,20 +196,16 @@ namespace terminal
         struct winsize _windowSize{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &_windowSize);
 
-        terminalWidth  = _windowSize.ws_col;
-        terminalHeight = _windowSize.ws_row;
-        gapWidth       = 3 - (terminalWidth  % 3);
-        gapHeight      = 2 - (terminalHeight % 2);
+        terminalWidth    = _windowSize.ws_col;
+        terminalHeight   = _windowSize.ws_row;
 
-        currentWidth   = (terminalWidth - gapWidth * 2) / 3;
-        previewWidth   = currentWidth;
-        subtasksWidth  = currentWidth;
-        menuWidth      = currentWidth;
+        gapWidth         = 3 - (terminalWidth  % 3);
+        gapHeight        = 2 - (terminalHeight % 2);
 
-        currentHeight  = (terminalHeight - gapHeight) / 2;
-        previewHeight  = currentHeight;
-        subtasksHeight = terminalHeight;
-        menuHeight     = terminalHeight;
+        panelWidth       = (terminalWidth  - gapWidth * 2) / 3;
+        panelHeight      = (terminalHeight               );
+
+        splitPanelHeight = (terminalHeight - gapHeight   ) / 2;
 
         std::cout << "\033[2J\033[3J\033[H";
     }
