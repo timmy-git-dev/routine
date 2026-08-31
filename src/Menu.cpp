@@ -1,287 +1,321 @@
-// #include "Menu.hpp"
-// #include "Task.hpp"
-// #include "Terminal.hpp"
-// #include "Input.hpp"
-// #include "Time.hpp"
-// #include <algorithm>
-// #include <climits>
-// #include <cstddef>
-// #include <vector>
+#include "Menu.hpp"
+#include "Task.hpp"
+#include "Terminal.hpp"
+#include "Input.hpp"
+#include <algorithm>
+#include <climits>
+#include <cstddef>
+#include <vector>
 
-// namespace menu
-// {
-//     enum class MENU_CASE : int
-//     {
-//         BACK = -1,
-//         STAY =  0,
-//         NEXT =  1,
-//     };
-//     enum class TASK_STATE : int
-//     {
-//         CANCEL  = -1,
+namespace menu
+{
+    enum class MENU_CASE : int
+    {
+        BACK = -1,
+        STAY =  0,
+        NEXT =  1,
+    };
+    enum class TASK_STATE : int
+    {
+        CANCEL  = -1,
 
-//         NAME        ,
-//         DESCRIPTION ,
-//         START_YEAR  ,
-//         START_MONTH ,
-//         START_DAY   ,
-//         START_HOUR  ,
-//         START_MINUTE,
-//         END_YEAR    ,
-//         END_MONTH   ,
-//         END_DAY     ,
-//         END_HOUR    ,
-//         END_MINUTE  ,
+        NAME        ,
+        DESCRIPTION ,
+        START_YEAR  ,
+        START_MONTH ,
+        START_DAY   ,
+        START_HOUR  ,
+        START_MINUTE,
+        END_YEAR    ,
+        END_MONTH   ,
+        END_DAY     ,
+        END_HOUR    ,
+        END_MINUTE  ,
 
-//         CONFIRM     ,
-//     };
+        CONFIRM     ,
+    };
 
-//     MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
-//     {
-//         switch (_input)
-//         {
-//             case input::KEYBIND::UP:                                                 return MENU_CASE::STAY;
-//             case input::KEYBIND::DOWN:                                               return MENU_CASE::STAY;
-//             case input::KEYBIND::CONFIRM:                                            return MENU_CASE::STAY;
+    MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
+    {
+        switch (_input)
+        {
+            case input::KEYBIND::UP:                                                 return MENU_CASE::STAY;
+            case input::KEYBIND::DOWN:                                               return MENU_CASE::STAY;
+            case input::KEYBIND::CONFIRM:                                            return MENU_CASE::STAY;
 
-//             case input::KEYBIND::NEXT:                                               return MENU_CASE::NEXT;
-//             case input::KEYBIND::BACK:                                               return MENU_CASE::BACK;
+            case input::KEYBIND::NEXT:                                               return MENU_CASE::NEXT;
+            case input::KEYBIND::BACK:                                               return MENU_CASE::BACK;
 
-//             case input::KEYBIND::DELETE:  if (_str.size() > 0) {_str.pop_back();}    return MENU_CASE::STAY;
-//             default:                      _str.push_back(static_cast<char>(_input)); return MENU_CASE::STAY;
-//         }
-//     }
-//     MENU_CASE edit_num(int &_num, input::KEYBIND _input, int _min, int _max)
-//     {
-//         switch (_input)
-//         {
-//             case input::KEYBIND::UP:   if (_num++ == _max) {_num = _min;} return MENU_CASE::STAY;
-//             case input::KEYBIND::DOWN: if (_num-- == _min) {_num = _max;} return MENU_CASE::STAY;
+            case input::KEYBIND::DELETE:  if (_str.size() > 0) {_str.pop_back();}    return MENU_CASE::STAY;
+            default:                      _str.push_back(static_cast<char>(_input)); return MENU_CASE::STAY;
+        }
+    }
+    MENU_CASE edit_num(int &_num, input::KEYBIND _input, int _min, int _max)
+    {
+        switch (_input)
+        {
+            case input::KEYBIND::UP:   if (_num++ == _max) {_num = _min;} return MENU_CASE::STAY;
+            case input::KEYBIND::DOWN: if (_num-- == _min) {_num = _max;} return MENU_CASE::STAY;
 
-//             case input::KEYBIND::NEXT: return MENU_CASE::NEXT;
-//             case input::KEYBIND::BACK: return MENU_CASE::BACK;
+            case input::KEYBIND::NEXT: return MENU_CASE::NEXT;
+            case input::KEYBIND::BACK: return MENU_CASE::BACK;
 
-//             default:                   return MENU_CASE::STAY;
-//         }
-//     }
+            default:                   return MENU_CASE::STAY;
+        }
+    }
 
-//     void print_parent_task(const Task &_task)
-//     {
-//         terminal::print
-//         (
-//             "%^"
-//             "NAME:        {}\n"
-//             "DESCRIPTION: {}\n"
-//             "STATUS:      {}\n"
-//             "SUBTASKS:    {}\n"
-//             "START:       {:04}/{:02}/{:02} {:02}:{:02}\n"
-//             "END:         {:04}/{:02}/{:02} {:02}:{:02}\n",
-//             _task.name,
-//             _task.description,
-//             _task.status,
-//             _task.subtasks.size(),
-//             _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute,
-//             _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute
-//         );
-//     }
-//     void print_subtask(const Task &_subtask, const bool _selected)
-//     {
-//         terminal::print
-//         (
-//             "%^{}{}{} : {:04}/{:02}/{:02} {:02}:{:02} - {:04}/{:02}/{:02} {:02}:{:02}\n",
-//             _selected            ? "%*" : ""  ,
-//             _subtask.status == 1 ? "%g" : "%r",
-//             _subtask.name,
-//             _subtask.startTime.year, _subtask.startTime.month, _subtask.startTime.day, _subtask.startTime.hour, _subtask.startTime.minute,
-//             _subtask.endTime  .year, _subtask.endTime  .month, _subtask.endTime  .day, _subtask.endTime  .hour, _subtask.endTime  .minute
-//         );
-//     }
-//     void print_subtasks(const Task &_task, const size_t _selectedSubtask)
-//     {
-//         print_parent_task(_task);
+    const std::string _horizontal = "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
+    const std::string _vertical   = "││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││";
 
-//         for (size_t _i = 0; _i < _task.subtasks.size(); ++_i)
-//         {
-//             print_subtask(_task.subtasks[_i], _i == _selectedSubtask);
-//         }
-//     }
-//     void display_task(Task &_task)
-//     {
-//         size_t _selectedSubtask = 0;
-//         while (true)
-//         {
-//             terminal::clear();
-//             print_subtasks(_task, _selectedSubtask);
+    void print_border_bg(size_t _x0, size_t _y0, size_t _width, size_t _height)
+    {
+        size_t _x1 = _x0 + _width - 1;
+        size_t _y1 = _y0 + 1;
+        size_t _y2 = _y0 - 1 + _height;
 
-//             input::KEYBIND _input = input::read();
+        terminal::print(_x0, _y0,                     "%W┌"); terminal::print(_x1, _y0,                       "┐");
+        terminal::print(_x0, _y1, 1, _height - 2, _vertical); terminal::print(_x1, _y1, 1, _height - 2, _vertical);
+        terminal::print(_x0, _y2,                       "└"); terminal::print(_x1, _y2,                       "┘");
+    }
+    void print_border_fg(size_t _x0, size_t _y0, size_t _width, size_t _height)
+    {
+        size_t _x1 = _x0 + _width - 1;
+        size_t _y1 = _y0 + 1;
+        size_t _y2 = _y0 - 1 + _height;
 
-//             switch (_input)
-//             {
-//                 case input::KEYBIND::NEW:     new_task(_task);                                                                                                                                        break;
-//                 case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask);                                                                                    break;
-//                 case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
-//                 case input::KEYBIND::UP:      _selectedSubtask = _selectedSubtask == 0                         ? _task.subtasks.size() - 1 : _selectedSubtask - 1;                                    break;
-//                 case input::KEYBIND::DOWN:    _selectedSubtask = _selectedSubtask == _task.subtasks.size() - 1 ? 0                         : _selectedSubtask + 1;                                    break;
-//                 case input::KEYBIND::NEXT:    if (_task.subtasks.size() > 0) display_task(_task.subtasks[_selectedSubtask]);                                                                          break;
-//                 case input::KEYBIND::BACK:                                                                                                                                                            return;
+        terminal::print(_x0, _y0,                     "%K╭"); terminal::print(_x0 + 1, _y0, _width - 2, 1, _horizontal); terminal::print(_x1, _y0,                       "╮");
+        terminal::print(_x0, _y1, 1, _height - 2, _vertical);                                                            terminal::print(_x1, _y1, 1, _height - 2, _vertical);
+        terminal::print(_x0, _y2,                       "╰"); terminal::print(_x0 + 1, _y2, _width - 2, 1, _horizontal); terminal::print(_x1, _y2,                       "╯");
+    }
 
-//                 case input::KEYBIND::CONFIRM:                                                                                                                                                         break;
-//                 case input::KEYBIND::DELETE:                                                                                                                                                          break;
-//                 default:                                                                                                                                                                              break;
-//             }
-//         }
-//     }
+    void print_bg()
+    {
+        print_border_bg(0                                              , 0                                               , terminal::panelWidth, terminal::splitPanelHeight); // Current.
+        print_border_bg(0                                              , terminal::splitPanelHeight + terminal::gapHeight, terminal::panelWidth, terminal::splitPanelHeight); // Preview.
+        print_border_bg( terminal::panelWidth + terminal::gapWidth     , 0                                               , terminal::panelWidth, terminal::panelHeight     ); // Subtasks.
+        print_border_bg((terminal::panelWidth + terminal::gapWidth) * 2, 0                                               , terminal::panelWidth, terminal::splitPanelHeight); // Command.
+    }
 
-//     void print_new_task(const Task &_task, const TASK_STATE _state)
-//     {
-//         terminal::print
-//         (
-//             "%^NAME:        {}{}\n"
-//             "%^DESCRIPTION: {}{}\n"
-//             "%^START:       {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n"
-//             "%^END:         {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n",
-//             _state == TASK_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
-//             _state == TASK_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
+    void print_current_task(const Task &_task)
+    {
+        print_border_fg(2, 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
+        terminal::print(2, 0, "%^%*%wCurrent Task");
 
-//             _state == TASK_STATE::START_YEAR   ? "%^%*" : "%^", _task.startTime.year  ,
-//             _state == TASK_STATE::START_MONTH  ? "%^%*" : "%^", _task.startTime.month ,
-//             _state == TASK_STATE::START_DAY    ? "%^%*" : "%^", _task.startTime.day   ,
-//             _state == TASK_STATE::START_HOUR   ? "%^%*" : "%^", _task.startTime.hour  ,
-//             _state == TASK_STATE::START_MINUTE ? "%^%*" : "%^", _task.startTime.minute,
+        terminal::print(4, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
 
-//             _state == TASK_STATE::END_YEAR     ? "%^%*" : "%^", _task.endTime.year  ,
-//             _state == TASK_STATE::END_MONTH    ? "%^%*" : "%^", _task.endTime.month ,
-//             _state == TASK_STATE::END_DAY      ? "%^%*" : "%^", _task.endTime.day   ,
-//             _state == TASK_STATE::END_HOUR     ? "%^%*" : "%^", _task.endTime.hour  ,
-//             _state == TASK_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
-//         );
-//     }
-//     void new_task(Task &_parentTask)
-//     {
-//         TASK_STATE _state = TASK_STATE::NAME;
-//         Task       _task
-//         {
-//             .name        = "",
-//             .description = "",
-//             .status      = 0,
-//             .subtasks    = std::vector<Task>(),
-//             .startTime   = Time::now(),
-//             .endTime     = Time::now(),
-//         };
+        terminal::print(4, 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
+        terminal::print(4, 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
+        terminal::print(4, terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
+        terminal::print(4, terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+    }
+    void print_preview(const Task &_task)
+    {
+        const size_t _y = terminal::splitPanelHeight + terminal::gapHeight;
 
-//         while (true)
-//         {
-//             terminal::clear();
-//             print_new_task(_task, _state);
+        print_border_fg(2, _y + 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
+        terminal::print(2, _y    , "%^%*%wPreview");
 
-//             input::KEYBIND _input = input::read();
+        terminal::print(4, _y + terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
 
-//             switch (_state)
-//             {
-//                 case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input));             if (_state != TASK_STATE::CANCEL) break;
-//                 case TASK_STATE::CANCEL:                                                                                                       return;
-//                 case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input));             break;
-//                 case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
-//                 case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
-//                 case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
-//                 case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
-//                 case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
-//                 case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
-//                 case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
-//                 case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
-//                 case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
-//                 case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
-//                 case TASK_STATE::CONFIRM:
-//                 {
-//                     for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
-//                     {
-//                         if (_task.startTime < _parentTask.subtasks[_i].startTime)
-//                         {
-//                             _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
-//                             return;
-//                         }
-//                     }
+        terminal::print(4, _y + 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
+        terminal::print(4, _y + 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
+        terminal::print(4, _y + terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
+        terminal::print(4, _y + terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+    }
+    void print_subtask(const Task &_task, size_t _index, const bool _selected)
+    {
+        const size_t _x = terminal::panelWidth + terminal::gapWidth + 2;
 
-//                     _parentTask.subtasks.push_back(_task);
-//                     return;
-//                 }
-//             }
-//         }
-//     }
+        print_border_fg(_x, 1 + _index * 4, terminal::panelWidth - 4, 4);
+        terminal::print(_x + 2, 1 + _index * 4, terminal::panelWidth - 8, 1, "%^{}%k{}", _selected ? "%*" : "",_task.name       );
+        terminal::print(_x + 2, 2 + _index * 4, terminal::panelWidth - 8, 1, "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
+        terminal::print(_x + 2, 3 + _index * 4, terminal::panelWidth - 8, 1, "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+    }
+    void print_subtasks(const Task &_task, const size_t _offset, const size_t _count, const size_t _selectedSubtask)
+    {
+        terminal::print(terminal::panelWidth + terminal::gapWidth + 2, 0, "%^%*%wSubtasks");
 
-//     void remove_task(Task &_parentTask, const size_t _index)
-//     {
-//         _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
-//     }
+        for (size_t _i = _offset; _i < _offset + _count; ++_i)
+        {
+            print_subtask(_task.subtasks[_i], _i - _offset, _i == _selectedSubtask);
+        }
+    }
+    void print_base(const Task &_task, size_t _selectedSubtask, size_t &_offset)
+    {
+        size_t _max = std::min(_task.subtasks.size(), (terminal::panelHeight - 2) / 4ul);
+        if (_selectedSubtask      <  _offset       ) _offset = _selectedSubtask;
+        else if (_selectedSubtask >= _offset + _max) _offset = _selectedSubtask - _max + 1;
 
-//     void print_edit_task(const Task &_task, const TASK_STATE _state)
-//     {
-//         terminal::print
-//         (
-//             "%^NAME:        {}{}\n"
-//             "%^DESCRIPTION: {}{}\n"
-//             "%^START:       {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n"
-//             "%^END:         {}{:04}%^/{}{:02}%^/{}{:02} {}{:02}%^:{}{:02}\n",
-//             _state == TASK_STATE::NAME         ? "%^%*" : "%^", _task.name            ,
-//             _state == TASK_STATE::DESCRIPTION  ? "%^%*" : "%^", _task.description     ,
+        print_bg();
+        print_current_task(_task);
+        print_subtasks(_task, _offset, _max, _selectedSubtask);
+        if (_task.subtasks.size() > 0)
+        {
+            print_preview(_task.subtasks[_selectedSubtask]);
+        }
+    }
 
-//             _state == TASK_STATE::START_YEAR   ? "%^%*" : "%^", _task.startTime.year  ,
-//             _state == TASK_STATE::START_MONTH  ? "%^%*" : "%^", _task.startTime.month ,
-//             _state == TASK_STATE::START_DAY    ? "%^%*" : "%^", _task.startTime.day   ,
-//             _state == TASK_STATE::START_HOUR   ? "%^%*" : "%^", _task.startTime.hour  ,
-//             _state == TASK_STATE::START_MINUTE ? "%^%*" : "%^", _task.startTime.minute,
+    void display_task(Task &_task)
+    {
+        size_t _selectedSubtask = 0;
+        size_t _offset          = 0;
+        while (true)
+        {
+            print_base(_task, _selectedSubtask, _offset);
+            terminal::write();
 
-//             _state == TASK_STATE::END_YEAR     ? "%^%*" : "%^", _task.endTime.year  ,
-//             _state == TASK_STATE::END_MONTH    ? "%^%*" : "%^", _task.endTime.month ,
-//             _state == TASK_STATE::END_DAY      ? "%^%*" : "%^", _task.endTime.day   ,
-//             _state == TASK_STATE::END_HOUR     ? "%^%*" : "%^", _task.endTime.hour  ,
-//             _state == TASK_STATE::END_MINUTE   ? "%^%*" : "%^", _task.endTime.minute
-//         );
-//     }
-//     void edit_task(Task &_parentTask, const size_t _index)
-//     {
-//         TASK_STATE _state = TASK_STATE::NAME;
-//         Task       _task  = _parentTask.subtasks[_index];
+            input::KEYBIND _input = input::read();
 
-//         while (true)
-//         {
-//             terminal::clear();
-//             print_edit_task(_task, _state);
+            switch (_input)
+            {
+                case input::KEYBIND::NEW:     new_task(_task, _selectedSubtask, _offset);                                                                                                                                        break;
+                case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask, _offset);                                                                                    break;
+                case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
+                case input::KEYBIND::UP:      _selectedSubtask = _selectedSubtask == 0                         ? _task.subtasks.size() - 1 : _selectedSubtask - 1;                                    break;
+                case input::KEYBIND::DOWN:    _selectedSubtask = _selectedSubtask == _task.subtasks.size() - 1 ? 0                         : _selectedSubtask + 1;                                    break;
+                case input::KEYBIND::NEXT:    if (_task.subtasks.size() > 0) display_task(_task.subtasks[_selectedSubtask]);                                                                          break;
+                case input::KEYBIND::BACK:                                                                                                                                                            return;
 
-//             input::KEYBIND _input = input::read();
+                default:                                                                                                                                                                              break;
+            }
+        }
+    }
 
-//             switch (_state)
-//             {
-//                 case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input            )); if (_state != TASK_STATE::CANCEL) break;
-//                 case TASK_STATE::CANCEL:                                                                                                       return;
-//                 case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input            )); break;
-//                 case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
-//                 case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
-//                 case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
-//                 case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
-//                 case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
-//                 case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
-//                 case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
-//                 case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
-//                 case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
-//                 case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
-//                 case TASK_STATE::CONFIRM:
-//                 {
-//                     _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
 
-//                     for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
-//                     {
-//                         if (_task.startTime < _parentTask.subtasks[_i].startTime)
-//                         {
-//                             _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
-//                             return;
-//                         }
-//                     }
+    void print_new_task(const Task &_parentTask, const size_t _index, size_t &_offset, const Task &_task, const TASK_STATE _state)
+    {
+        print_base(_parentTask, _index, _offset);
 
-//                     _parentTask.subtasks.push_back(_task);
-//                     return;
-//                 }
-//             }
-//         }
-//     }
-// };
+        const size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
+
+        print_border_fg(_x, 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
+        terminal::print(_x, 0, "%^%*%wNew");
+
+        terminal::print(_x + 2, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
+
+        terminal::print(_x + 2, 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
+        terminal::print(_x + 2, 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+    }
+    void new_task(Task &_parentTask, const size_t _index, size_t &_offset)
+    {
+        TASK_STATE _state = TASK_STATE::NAME;
+        Task       _task
+        {
+            .name        = "task_name",
+            .description = "task_description",
+            .status      = 0,
+            .subtasks    = std::vector<Task>(),
+            .startTime   = Time::now(),
+            .endTime     = Time::now(),
+        };
+
+        while (true)
+        {
+            print_new_task(_parentTask, _index, _offset, _task, _state);
+            terminal::write();
+
+            input::KEYBIND _input = input::read();
+
+            switch (_state)
+            {
+                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input));             if (_state != TASK_STATE::CANCEL) break;
+                case TASK_STATE::CANCEL:                                                                                                       return;
+                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input));             break;
+                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
+                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
+                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
+                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
+                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
+                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
+                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
+                case TASK_STATE::CONFIRM:
+                {
+                    for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
+                    {
+                        if (_task.startTime < _parentTask.subtasks[_i].startTime)
+                        {
+                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
+                            return;
+                        }
+                    }
+
+                    _parentTask.subtasks.push_back(_task);
+                    return;
+                }
+            }
+        }
+    }
+
+    void remove_task(Task &_parentTask, const size_t _index)
+    {
+        _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
+    }
+
+    void print_edit_task(const Task &_parentTask, const size_t _index, size_t &_offset, const Task &_task, const TASK_STATE _state)
+    {
+        print_base(_parentTask, _index, _offset);
+
+        const size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
+
+        print_border_fg(_x, 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
+        terminal::print(_x, 0, "%^%*%wNew");
+
+        terminal::print(_x + 2, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
+
+        terminal::print(_x + 2, 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
+        terminal::print(_x + 2, 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+    }
+    void edit_task(Task &_parentTask, const size_t _index, size_t &_offset)
+    {
+        TASK_STATE _state = TASK_STATE::NAME;
+        Task       _task  = _parentTask.subtasks[_index];
+
+        while (true)
+        {
+            print_edit_task(_parentTask, _index, _offset, _task, _state);
+            terminal::write();
+
+            input::KEYBIND _input = input::read();
+
+            switch (_state)
+            {
+                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input            )); if (_state != TASK_STATE::CANCEL) break;
+                case TASK_STATE::CANCEL:                                                                                                       return;
+                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input            )); break;
+                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
+                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
+                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
+                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
+                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
+                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
+                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
+                case TASK_STATE::CONFIRM:
+                {
+                    _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
+
+                    for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
+                    {
+                        if (_task.startTime < _parentTask.subtasks[_i].startTime)
+                        {
+                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
+                            return;
+                        }
+                    }
+
+                    _parentTask.subtasks.push_back(_task);
+                    return;
+                }
+            }
+        }
+    }
+};

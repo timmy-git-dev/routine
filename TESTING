@@ -3,35 +3,35 @@
 
 
 ┌ Current Task                            ┐   ┌ Subtasks                                ┐   ┌                                         ┐
-│ ╭─task_name───────────────────────────╮ │   │ ─────────────────────────────────────── │   │                                         │
-│ │                                     │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ ╭─task_name───────────────────────────╮ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
 │ │ task_description...                 │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │ ─────────────────────────────────── │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │                                     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
-│ │                                     │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │                                     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
-│ ╰─task_type───────────────────────────╯ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
-└                                         ┘   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-                                              │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-┌ Preview                                 ┐   │ ╰─task_type───────────────────────────╯ │   │                                         │
-│ ╭─selected_subtask_name───────────────╮ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │ selected_subtask_description...     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
-│ │ ─────────────────────────────────── │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
+│ │─────────────────────────────────────│ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
 │ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
 │ │ YYYY/MM/DD-HH:MM                    │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
 │ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
 │ │                                     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
-│ │                                     │ │   │ ─────────────────────────────────────── │   │                                         │
+│ │                                     │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │                                     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
+│ │                                     │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ ╰─task_type───────────────────────────╯ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+└                                         ┘   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+                                              │ ╰─task_type───────────────────────────╯ │   │                                         │
+┌ Preview                                 ┐   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ ╭─selected_subtask_name───────────────╮ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │ selected_subtask_description...     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
+│ │                                     │ │   │ ╭─subtask_name────────────────────────╮ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │
+│ │                                     │ │   │ ╰─task_type───────────────────────────╯ │   │                                         │
 │ │                                     │ │   │                                         │   │                                         │
 │ │                                     │ │   │                                         │   │                                         │
-│ │                                     │ │   │                                         │   │                                         │
+│ │─────────────────────────────────────│ │   │                                         │   │                                         │
+│ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │   │                                         │
+│ │ YYYY/MM/DD-HH:MM                    │ │   │                                         │   │                                         │
 │ │                                     │ │   │                                         │   │                                         │
 │ ╰─selected_subtask_type───────────────╯ │   │                                         │   │                                         │
 └                                         ┘   └                                         ┘   └                                         ┘
@@ -68,24 +68,24 @@
 │ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │ │                                     │ │
 │ │                                     │ │   │ ╰─task_type───────────────────────╯ │   │ │                                     │ │
 │ ╰─task_type───────────────────────────╯ │   │ ╭─subtask_name────────────────────╮ │   │ ╰─new_task_type───────────────────────╯ │
-└                                         ┘   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-                                              │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-┌ Preview                                 ┐   │ ╰─task_type───────────────────────╯ │   │                                         │
-│ ╭─selected_subtask_name───────────────╮ │   │ ╭─subtask_name────────────────────╮ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-│ │ selected_subtask_description...     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-│ │ ─────────────────────────────────── │ │   │ ╰─task_type───────────────────────╯ │   │                                         │
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────╮ │   │                                         │
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
-│ │                                     │ │   │ ╰─task_type───────────────────────╯ │   │                                         │
-│ │                                     │ │   │ ─────────────────────────────────── │   │                                         │
-│ │                                     │ │   │                                     │   │                                         │
-│ │                                     │ │   │                                     │   │                                         │
-│ │                                     │ │   │                                     │   │                                         │
-│ │                                     │ │   │                                     │   │                                         │
-│ ╰─selected_subtask_type───────────────╯ │   │                                     │   │                                         │
-└                                         ┘   └                                     ┘   └                                         ┘
+└                                         ┘   │ │ YYYY/MM/DD-HH:MM                │ │   └                                         ┘
+                                              │ │ YYYY/MM/DD-HH:MM                │ │
+┌ Preview                                 ┐   │ ╰─task_type───────────────────────╯ │     Keybinds
+│ ╭─selected_subtask_name───────────────╮ │   │ ╭─subtask_name────────────────────╮ │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │      [_] Type new task name.
+│ │ selected_subtask_description...     │ │   │ │ YYYY/MM/DD-HH:MM                │ │
+│ │ ─────────────────────────────────── │ │   │ ╰─task_type───────────────────────╯ │      [←] Cancel creating task.
+│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────╮ │
+│ │ YYYY/MM/DD-HH:MM                    │ │   │ │ YYYY/MM/DD-HH:MM                │ │      [→] Change new task name.
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │
+│ │                                     │ │   │ ╰─task_type───────────────────────╯ │
+│ │                                     │ │   │ ─────────────────────────────────── │
+│ │                                     │ │   │                                     │
+│ │                                     │ │   │                                     │
+│ │                                     │ │   │                                     │
+│ │                                     │ │   │                                     │
+│ ╰─selected_subtask_type───────────────╯ │   │                                     │
+└                                         ┘   └                                     ┘
 
 [_] Type new task name.
 [←] Cancel creating task.

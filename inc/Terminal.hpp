@@ -32,6 +32,7 @@ namespace terminal
     inline int panelWidth, panelHeight;
     inline int splitPanelHeight;
 
+    inline std::string output;
 
     template<typename... Args>
     void print(size_t _x, size_t _y, std::string _text, Args&&... _args)
@@ -39,8 +40,7 @@ namespace terminal
         ++_x;
         ++_y;
         _text = std::vformat(_text, std::make_format_args(_args...));
-        std::string _output = std::format("\033[{};{}H", _y++, _x);
-        _output.reserve(_text.size() * 2);
+        output += std::format("\033[{};{}H", _y++, _x);
 
         size_t _index = 0;
         size_t _next;
@@ -48,7 +48,7 @@ namespace terminal
         {
             if (_next - _index > 0)
             {
-                _output += std::string_view(_text.data() + _index, _next - _index);
+                output += std::string_view(_text.data() + _index, _next - _index);
             }
 
             _index = _next + 1;
@@ -56,37 +56,35 @@ namespace terminal
             switch (static_cast<CODE_CHARS>(_text[_index++]))
             {
                 #define SET_BIT(CODE) gridProperties[(_x + _offsetX) + (terminalWidth) * (_y + _offsetY)].bits.CODE = 1; continue
-                case CODE_CHARS::RESET       : _output += "\033[0m";                break;
-                case CODE_CHARS::BOLD        : _output += "\033[1m";                break;
-                case CODE_CHARS::ITALIC      : _output += "\033[3m";                break;
-                case CODE_CHARS::UNDERLINE   : _output += "\033[4m";                break;
-                case CODE_CHARS::BLINK       : _output += "\033[5m";                break;
-                case CODE_CHARS::STRIKE      : _output += "\033[9m";                break;
+                case CODE_CHARS::RESET       : output += "\033[0m";                break;
+                case CODE_CHARS::BOLD        : output += "\033[1m";                break;
+                case CODE_CHARS::ITALIC      : output += "\033[3m";                break;
+                case CODE_CHARS::UNDERLINE   : output += "\033[4m";                break;
+                case CODE_CHARS::BLINK       : output += "\033[5m";                break;
+                case CODE_CHARS::STRIKE      : output += "\033[9m";                break;
 
-                case CODE_CHARS::WHT_DRK     : _output += "\033[38;2;176;179;199m"; break;
-                case CODE_CHARS::WHT_LIT     : _output += "\033[38;2;210;214;224m"; break;
-                case CODE_CHARS::BLK_DRK     : _output += "\033[38;2;0;0;0m";       break;
-                case CODE_CHARS::BLK_LIT     : _output += "\033[38;2;112;117;141m"; break;
-                case CODE_CHARS::RED_DRK     : _output += "\033[38;2;241;44;65m";   break;
-                case CODE_CHARS::RED_LIT     : _output += "\033[38;2;251;120;94m";  break;
-                case CODE_CHARS::YLW_DRK     : _output += "\033[38;2;255;197;55m";  break;
-                case CODE_CHARS::YLW_LIT     : _output += "\033[38;2;255;233;19m";  break;
-                case CODE_CHARS::GRN_DRK     : _output += "\033[38;2;19;237;71m";   break;
-                case CODE_CHARS::GRN_LIT     : _output += "\033[38;2;86;250;49m";   break;
-                case CODE_CHARS::BLU_DRK     : _output += "\033[38;2;96;82;247m";   break;
-                case CODE_CHARS::BLU_LIT     : _output += "\033[38;2;141;131;252m"; break;
-                case CODE_CHARS::PNK_DRK     : _output += "\033[38;2;252;89;252m";  break;
-                case CODE_CHARS::PNK_LIT     : _output += "\033[38;2;252;142;252m"; break;
+                case CODE_CHARS::WHT_DRK     : output += "\033[38;2;176;179;199m"; break;
+                case CODE_CHARS::WHT_LIT     : output += "\033[38;2;210;214;224m"; break;
+                case CODE_CHARS::BLK_DRK     : output += "\033[38;2;0;0;0m";       break;
+                case CODE_CHARS::BLK_LIT     : output += "\033[38;2;112;117;141m"; break;
+                case CODE_CHARS::RED_DRK     : output += "\033[38;2;241;44;65m";   break;
+                case CODE_CHARS::RED_LIT     : output += "\033[38;2;251;120;94m";  break;
+                case CODE_CHARS::YLW_DRK     : output += "\033[38;2;255;197;55m";  break;
+                case CODE_CHARS::YLW_LIT     : output += "\033[38;2;255;233;19m";  break;
+                case CODE_CHARS::GRN_DRK     : output += "\033[38;2;19;237;71m";   break;
+                case CODE_CHARS::GRN_LIT     : output += "\033[38;2;86;250;49m";   break;
+                case CODE_CHARS::BLU_DRK     : output += "\033[38;2;96;82;247m";   break;
+                case CODE_CHARS::BLU_LIT     : output += "\033[38;2;141;131;252m"; break;
+                case CODE_CHARS::PNK_DRK     : output += "\033[38;2;252;89;252m";  break;
+                case CODE_CHARS::PNK_LIT     : output += "\033[38;2;252;142;252m"; break;
                 default                      :                                      break;
             }
         }
 
         if (_text.size() - _index > 0)
         {
-            _output += std::string_view(_text.data() + _index, _text.size() - _index);
+            output += std::string_view(_text.data() + _index, _text.size() - _index);
         }
-
-        std::cout << _output;
     }
     template<typename... Args>
     void print(size_t _x, size_t _y, size_t _width, size_t _height, const std::string &_input, Args&&... _args)
@@ -96,8 +94,7 @@ namespace terminal
 
         std::string _text = std::vformat(_input, std::make_format_args(_args...));
 
-        std::string _output = std::format("\033[{};{}H", _y, _x);
-        _output.reserve(_text.size() * 2);
+        output += std::format("\033[{};{}H", _y, _x);
 
         size_t _index = 0;
         size_t _col = 0;
@@ -111,7 +108,7 @@ namespace terminal
             if (_row >= _height)
                 return false;
 
-            _output += std::format("\033[{};{}H", _y + _row, _x);
+            output += std::format("\033[{};{}H", _y + _row, _x);
             return true;
         };
 
@@ -124,27 +121,27 @@ namespace terminal
 
                 switch (static_cast<CODE_CHARS>(_text[_index + 1]))
                 {
-                    case CODE_CHARS::RESET:     _output += "\033[0m"; break;
-                    case CODE_CHARS::BOLD:      _output += "\033[1m"; break;
-                    case CODE_CHARS::ITALIC:    _output += "\033[3m"; break;
-                    case CODE_CHARS::UNDERLINE: _output += "\033[4m"; break;
-                    case CODE_CHARS::BLINK:     _output += "\033[5m"; break;
-                    case CODE_CHARS::STRIKE:    _output += "\033[9m"; break;
+                    case CODE_CHARS::RESET:     output += "\033[0m"; break;
+                    case CODE_CHARS::BOLD:      output += "\033[1m"; break;
+                    case CODE_CHARS::ITALIC:    output += "\033[3m"; break;
+                    case CODE_CHARS::UNDERLINE: output += "\033[4m"; break;
+                    case CODE_CHARS::BLINK:     output += "\033[5m"; break;
+                    case CODE_CHARS::STRIKE:    output += "\033[9m"; break;
 
-                    case CODE_CHARS::WHT_DRK:   _output += "\033[38;2;176;179;199m"; break;
-                    case CODE_CHARS::WHT_LIT:   _output += "\033[38;2;210;214;224m"; break;
-                    case CODE_CHARS::BLK_DRK:   _output += "\033[38;2;0;0;0m";       break;
-                    case CODE_CHARS::BLK_LIT:   _output += "\033[38;2;112;117;141m"; break;
-                    case CODE_CHARS::RED_DRK:   _output += "\033[38;2;241;44;65m";   break;
-                    case CODE_CHARS::RED_LIT:   _output += "\033[38;2;251;120;94m";  break;
-                    case CODE_CHARS::YLW_DRK:   _output += "\033[38;2;255;197;55m";  break;
-                    case CODE_CHARS::YLW_LIT:   _output += "\033[38;2;255;233;19m";  break;
-                    case CODE_CHARS::GRN_DRK:   _output += "\033[38;2;19;237;71m";   break;
-                    case CODE_CHARS::GRN_LIT:   _output += "\033[38;2;86;250;49m";   break;
-                    case CODE_CHARS::BLU_DRK:   _output += "\033[38;2;96;82;247m";   break;
-                    case CODE_CHARS::BLU_LIT:   _output += "\033[38;2;141;131;252m"; break;
-                    case CODE_CHARS::PNK_DRK:   _output += "\033[38;2;252;89;252m";  break;
-                    case CODE_CHARS::PNK_LIT:   _output += "\033[38;2;252;142;252m"; break;
+                    case CODE_CHARS::WHT_DRK:   output += "\033[38;2;176;179;199m"; break;
+                    case CODE_CHARS::WHT_LIT:   output += "\033[38;2;210;214;224m"; break;
+                    case CODE_CHARS::BLK_DRK:   output += "\033[38;2;0;0;0m";       break;
+                    case CODE_CHARS::BLK_LIT:   output += "\033[38;2;112;117;141m"; break;
+                    case CODE_CHARS::RED_DRK:   output += "\033[38;2;241;44;65m";   break;
+                    case CODE_CHARS::RED_LIT:   output += "\033[38;2;251;120;94m";  break;
+                    case CODE_CHARS::YLW_DRK:   output += "\033[38;2;255;197;55m";  break;
+                    case CODE_CHARS::YLW_LIT:   output += "\033[38;2;255;233;19m";  break;
+                    case CODE_CHARS::GRN_DRK:   output += "\033[38;2;19;237;71m";   break;
+                    case CODE_CHARS::GRN_LIT:   output += "\033[38;2;86;250;49m";   break;
+                    case CODE_CHARS::BLU_DRK:   output += "\033[38;2;96;82;247m";   break;
+                    case CODE_CHARS::BLU_LIT:   output += "\033[38;2;141;131;252m"; break;
+                    case CODE_CHARS::PNK_DRK:   output += "\033[38;2;252;89;252m";  break;
+                    case CODE_CHARS::PNK_LIT:   output += "\033[38;2;252;142;252m"; break;
                     default: break;
                 }
 
@@ -181,20 +178,23 @@ namespace terminal
                 }
             }
 
-            _output.append(_text, _index, _charSize);
+            output.append(_text, _index, _charSize);
 
             _index += _charSize;
             ++_col;
         }
-
-        std::cout << _output;
     }
 
     inline void cursor(bool _visible) {std::cout << (_visible ? "\033[?25h" : "\033[?25l");}
-    inline void clear()
+    inline void update()
     {
         struct winsize _windowSize{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &_windowSize);
+
+        if (terminalWidth == _windowSize.ws_col && terminalHeight == _windowSize.ws_row)
+        {
+            return;
+        }
 
         terminalWidth    = _windowSize.ws_col;
         terminalHeight   = _windowSize.ws_row;
@@ -206,7 +206,13 @@ namespace terminal
         panelHeight      = (terminalHeight               );
 
         splitPanelHeight = (terminalHeight - gapHeight   ) / 2;
-
-        std::cout << "\033[2J\033[3J\033[H";
+    }
+    inline void write()
+    {
+        std::cout << output;
+        std::cout.flush();
+        output = "\033[2J\033[3J\033[H";
+        output.reserve(terminalWidth * terminalHeight);
+        update();
     }
 }
