@@ -54,4 +54,5 @@ BIN_DIR="$HOME/.local/bin"
 install -d "$BIN_DIR"
 install -m 755 "$PATH_EXE" "$BIN_DIR/scheduler"
 
+echo "Built:"
 $BIN_DIR/scheduler
