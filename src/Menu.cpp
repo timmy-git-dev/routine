@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <format>
 #include <vector>
 
 namespace menu
@@ -97,6 +98,7 @@ namespace menu
         print_border_bg(0                                              , terminal::splitPanelHeight + terminal::gapHeight, terminal::panelWidth, terminal::splitPanelHeight); // Preview.
         print_border_bg( terminal::panelWidth + terminal::gapWidth     , 0                                               , terminal::panelWidth, terminal::panelHeight     ); // Subtasks.
         print_border_bg((terminal::panelWidth + terminal::gapWidth) * 2, 0                                               , terminal::panelWidth, terminal::splitPanelHeight); // Command.
+        print_border_bg((terminal::panelWidth + terminal::gapWidth) * 2, terminal::splitPanelHeight + terminal::gapHeight, terminal::panelWidth, terminal::splitPanelHeight); // Keybinds.
     }
 
     void print_current_task(const Task &_task)
@@ -157,6 +159,14 @@ namespace menu
             print_preview(_task.subtasks[_selectedSubtask]);
         }
     }
+    void print_info(const std::string &_info)
+    {
+        size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
+        size_t _y = terminal::splitPanelHeight + terminal::gapHeight;
+
+        terminal::print(_x, _y, "%^%*%wInfo");
+        terminal::print(_x + 1, _y + 2, terminal::panelWidth - 6, terminal::splitPanelHeight - 4, _info);
+    }
 
     void insert_task(Task &_parentTask, Task &_task)
     {
@@ -179,7 +189,22 @@ namespace menu
         size_t _offset          = 0;
         while (true)
         {
+            std::string _info;
+            _info.reserve(512);
+
+                                            _info += std::format("%^%W[%w←%W] %KExit current task %*{}%^%K.\n"      , _task.name);
+            if (_task.subtasks.size() > 0) {_info += std::format("%^%W[%w→%W] %KEnter selected subtask %*{}%^%K.\n" , _task.subtasks[_selectedSubtask].name);}
+                                            _info += '\n';
+                                            _info +=             "%^%W[%wn%W] %KCreate new subtask.\n";
+            if (_task.subtasks.size() > 0) {_info += std::format("%^%W[%we%W] %KEdit selected subtask %*{}%^%K.\n"  , _task.subtasks[_selectedSubtask].name);}
+            if (_task.subtasks.size() > 0) {_info += std::format("%^%W[%wr%W] %KRemove selected subtask %*{}%^%K.\n", _task.subtasks[_selectedSubtask].name);}
+                                            _info += '\n';
+            if (_task.subtasks.size() > 0) {_info += std::format("%^%W[%wc%W] %KCopy selected subtask %*{}%^%K.\n"  , _task.subtasks[_selectedSubtask].name);}
+                                            _info += std::format("%^%W[%wv%W] %KPaste copied subtask %*{}%^%K.\n"   , copiedTask                      .name);
+
+
             print_base(_task, _selectedSubtask, _offset);
+            print_info(_info);
             terminal::write();
 
             input::KEYBIND _input = input::read();
@@ -222,6 +247,46 @@ namespace menu
 
         terminal::print(_x + 2, terminal::splitPanelHeight - 5, "%^%K{}{:04}%^%K/{}{:02}%^%K/{}{:02}%^%K-{}{:02}%^%K:{}{:02}", BOLD(START_YEAR), _newTask.startTime.year, BOLD(START_MONTH), _newTask.startTime.month, BOLD(START_DAY), _newTask.startTime.day, BOLD(START_HOUR), _newTask.startTime.hour, BOLD(START_MINUTE), _newTask.startTime.minute);
         terminal::print(_x + 2, terminal::splitPanelHeight - 4, "%^%K{}{:04}%^%K/{}{:02}%^%K/{}{:02}%^%K-{}{:02}%^%K:{}{:02}", BOLD(END_YEAR  ), _newTask.endTime  .year, BOLD(END_MONTH  ), _newTask.endTime  .month, BOLD(END_DAY  ), _newTask.endTime  .day, BOLD(END_HOUR  ), _newTask.endTime  .hour, BOLD(END_MINUTE  ), _newTask.endTime  .minute);
+
+
+        #define INFO_STR(EXIT, ENTER, TYPE)                                     \
+        {                                                                       \
+            _info += std::format("%^%W[%w←%W] %K "     EXIT  "\n"        );     \
+            _info += std::format("%^%W[%w→%W] %K "     ENTER "\n"        );     \
+            _info += std::format("%^%W[%w_%W] %KEdit " TYPE " of task.\n");     \
+            break;                                                              \
+        }
+        #define INFO_NUM(EXIT, ENTER, TYPE)                                     \
+        {                                                                       \
+            _info += std::format("%^%W[%w←%W] %K"          EXIT  "\n");         \
+            _info += std::format("%^%W[%w→%W] %K"          ENTER "\n");         \
+            _info += std::format("%^%W[%w↑%W] %KIncrease " TYPE ".\n");         \
+            _info += std::format("%^%W[%w↓%W] %KDecrease " TYPE ".\n");         \
+            break;                                                              \
+        }
+
+        std::string _info;
+        _info.reserve(256);
+
+        switch (_state)
+        {
+            case TASK_STATE::NAME:          INFO_STR("Cancel creating new task.", "Change description of task.", "name")
+            case TASK_STATE::DESCRIPTION:   INFO_STR("Change name of task.", "Change start-year of task.", "description")
+            case TASK_STATE::START_YEAR:    INFO_NUM("Change description of task.", "Change start-month of task.", "start-year")
+            case TASK_STATE::START_MONTH:   INFO_NUM("Change start-year of task.", "Change start-day of task.", "start-month")
+            case TASK_STATE::START_DAY:     INFO_NUM("Change start-month of task.", "Change start-hour of task.", "start-day")
+            case TASK_STATE::START_HOUR:    INFO_NUM("Change start-day of task.", "Change start-minute of task.", "start-hour")
+            case TASK_STATE::START_MINUTE:  INFO_NUM("Change start-hour of task.", "Change end-year of task.", "start-minute")
+            case TASK_STATE::END_YEAR:      INFO_NUM("Change start-minute of task.", "Change start-month of task.", "end-year")
+            case TASK_STATE::END_MONTH:     INFO_NUM("Change end-year of task.", "Change start-day of task.", "end-month")
+            case TASK_STATE::END_DAY:       INFO_NUM("Change end-month of task.", "Change start-hour of task.", "end-day")
+            case TASK_STATE::END_HOUR:      INFO_NUM("Change end-day of task.", "Change start-minute of task.", "end-hour")
+            case TASK_STATE::END_MINUTE:    INFO_NUM("Change end-hour of task.", "Finish creating new task.", "end-minute")
+
+            default: break;
+        }
+
+        print_info(_info);
     }
 
     void new_task(Task &_parentTask, const size_t _index, size_t &_offset)

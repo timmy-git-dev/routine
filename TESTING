@@ -70,22 +70,22 @@
 │ ╰─task_type───────────────────────────╯ │   │ ╭─subtask_name────────────────────╮ │   │ ╰─new_task_type───────────────────────╯ │
 └                                         ┘   │ │ YYYY/MM/DD-HH:MM                │ │   └                                         ┘
                                               │ │ YYYY/MM/DD-HH:MM                │ │
-┌ Preview                                 ┐   │ ╰─task_type───────────────────────╯ │     Keybinds
-│ ╭─selected_subtask_name───────────────╮ │   │ ╭─subtask_name────────────────────╮ │
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │      [_] Type new task name.
-│ │ selected_subtask_description...     │ │   │ │ YYYY/MM/DD-HH:MM                │ │
-│ │ ─────────────────────────────────── │ │   │ ╰─task_type───────────────────────╯ │      [←] Cancel creating task.
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────╮ │
-│ │ YYYY/MM/DD-HH:MM                    │ │   │ │ YYYY/MM/DD-HH:MM                │ │      [→] Change new task name.
-│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │
-│ │                                     │ │   │ ╰─task_type───────────────────────╯ │
-│ │                                     │ │   │ ─────────────────────────────────── │
-│ │                                     │ │   │                                     │
-│ │                                     │ │   │                                     │
-│ │                                     │ │   │                                     │
-│ │                                     │ │   │                                     │
-│ ╰─selected_subtask_type───────────────╯ │   │                                     │
-└                                         ┘   └                                     ┘
+┌ Preview                                 ┐   │ ╰─task_type───────────────────────╯ │   ┌ Keybinds                                ┐
+│ ╭─selected_subtask_name───────────────╮ │   │ ╭─subtask_name────────────────────╮ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │  [_] Type new task name.                │
+│ │ selected_subtask_description...     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │  [←] Cancel creating task.              │
+│ │ ─────────────────────────────────── │ │   │ ╰─task_type───────────────────────╯ │   │  [→] Change new task name.              │
+│ │ YYYY/MM/DD-HH:MM                    │ │   │ ╭─subtask_name────────────────────╮ │   │                                         │
+│ │ YYYY/MM/DD-HH:MM                    │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
+│ │                                     │ │   │ │ YYYY/MM/DD-HH:MM                │ │   │                                         │
+│ │                                     │ │   │ ╰─task_type───────────────────────╯ │   │                                         │
+│ │                                     │ │   │ ─────────────────────────────────── │   │                                         │
+│ │                                     │ │   │                                     │   │                                         │
+│ │                                     │ │   │                                     │   │                                         │
+│ │                                     │ │   │                                     │   │                                         │
+│ │                                     │ │   │                                     │   │                                         │
+│ ╰─selected_subtask_type───────────────╯ │   │                                     │   │                                         │
+└                                         ┘   └                                     ┘   └                                         ┘
 
 [_] Type new task name.
 [←] Cancel creating task.
