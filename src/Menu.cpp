@@ -181,70 +181,77 @@ namespace menu
         }
     }
 
-
-    void print_new_task(const Task &_parentTask, const size_t _index, size_t &_offset, const Task &_task, const TASK_STATE _state)
+    void print_command(std::string _title, const Task &_oldTask, const Task &_newTask, const TASK_STATE _state)
     {
-        print_base(_parentTask, _index, _offset);
-
         const size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
 
         print_border_fg(_x, 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
-        terminal::print(_x, 0, "%^%*%wNew");
+        terminal::print(_x, 0, _title);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1, "%^%k{}", _horizontal);
 
-        terminal::print(_x + 2, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
+        #define BOLD(STATE) _state == TASK_STATE::STATE ? "%*" : ""
 
-        terminal::print(_x + 2, 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
-        terminal::print(_x + 2, 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
-        terminal::print(_x + 2, terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
-        terminal::print(_x + 2, terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
+        terminal::print(_x + 2, 1, terminal::panelWidth - 8, 1                             ,                                                     "%^%K{}", _oldTask.name);
+        terminal::print(_x + 2, 1, terminal::panelWidth - 8, 1                             , _state == TASK_STATE::NAME        ? "%^%k{}%^%K_" : "%^%k{}", _newTask.name);
+
+        terminal::print(_x + 2, 3, terminal::panelWidth - 8, terminal::splitPanelHeight - 9,                                                     "%^%w{}", _oldTask.description);
+        terminal::print(_x + 2, 3, terminal::panelWidth - 8, terminal::splitPanelHeight - 9, _state == TASK_STATE::DESCRIPTION ? "%^%K{}%^%w_" : "%^%K{}", _newTask.description);
+
+        terminal::print(_x + 2, terminal::splitPanelHeight - 5, "%^%K{}{:04}%^%K/{}{:02}%^%K/{}{:02}%^%K-{}{:02}%^%K:{}{:02}", BOLD(START_YEAR), _newTask.startTime.year, BOLD(START_MONTH), _newTask.startTime.month, BOLD(START_DAY), _newTask.startTime.day, BOLD(START_HOUR), _newTask.startTime.hour, BOLD(START_MINUTE), _newTask.startTime.minute);
+        terminal::print(_x + 2, terminal::splitPanelHeight - 4, "%^%K{}{:04}%^%K/{}{:02}%^%K/{}{:02}%^%K-{}{:02}%^%K:{}{:02}", BOLD(END_YEAR  ), _newTask.endTime  .year, BOLD(END_MONTH  ), _newTask.endTime  .month, BOLD(END_DAY  ), _newTask.endTime  .day, BOLD(END_HOUR  ), _newTask.endTime  .hour, BOLD(END_MINUTE  ), _newTask.endTime  .minute);
     }
+
     void new_task(Task &_parentTask, const size_t _index, size_t &_offset)
     {
         TASK_STATE _state = TASK_STATE::NAME;
-        Task       _task
+        Task       _oldTask
         {
-            .name        = "task_name",
-            .description = "task_description",
+            .name        = "name",
+            .description = "description",
             .status      = 0,
             .subtasks    = std::vector<Task>(),
             .startTime   = Time::now(),
             .endTime     = Time::now(),
         };
+        Task       _newTask = _oldTask;
+        _newTask.name        = "";
+        _newTask.description = "";
 
         while (true)
         {
-            print_new_task(_parentTask, _index, _offset, _task, _state);
+            print_base(_parentTask, _index, _offset);
+            print_command("%^%*%wNew", _oldTask, _newTask, _state);
             terminal::write();
 
             input::KEYBIND _input = input::read();
 
             switch (_state)
             {
-                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_task.name            , _input));             if (_state != TASK_STATE::CANCEL) break;
-                case TASK_STATE::CANCEL:                                                                                                       return;
-                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_task.description     , _input));             break;
-                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.year  , _input, 0, INT_MAX)); break;
-                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.month , _input, 1, 12     )); break;
-                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.day   , _input, 1, 31     )); break;
-                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.hour  , _input, 0, 23     )); break;
-                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_task.startTime.minute, _input, 0, 59     )); break;
-                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .year  , _input, 0, INT_MAX)); break;
-                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
-                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
-                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
-                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
+                case TASK_STATE::NAME:         _state = (TASK_STATE)((int)_state + (int)edit_str(_newTask.name            , _input));             if (_state != TASK_STATE::CANCEL) break;
+                case TASK_STATE::CANCEL:                                                                                                          return;
+                case TASK_STATE::DESCRIPTION:  _state = (TASK_STATE)((int)_state + (int)edit_str(_newTask.description     , _input));             break;
+                case TASK_STATE::START_YEAR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.startTime.year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::START_MONTH:  _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.startTime.month , _input, 1, 12     )); break;
+                case TASK_STATE::START_DAY:    _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.startTime.day   , _input, 1, 31     )); break;
+                case TASK_STATE::START_HOUR:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.startTime.hour  , _input, 0, 23     )); break;
+                case TASK_STATE::START_MINUTE: _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.startTime.minute, _input, 0, 59     )); break;
+                case TASK_STATE::END_YEAR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .year  , _input, 0, INT_MAX)); break;
+                case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .month , _input, 1, 12     )); break;
+                case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .day   , _input, 1, 31     )); break;
+                case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .hour  , _input, 0, 23     )); break;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
                 case TASK_STATE::CONFIRM:
                 {
                     for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
                     {
-                        if (_task.startTime < _parentTask.subtasks[_i].startTime)
+                        if (_newTask.startTime < _parentTask.subtasks[_i].startTime)
                         {
-                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
+                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _newTask);
                             return;
                         }
                     }
 
-                    _parentTask.subtasks.push_back(_task);
+                    _parentTask.subtasks.push_back(_newTask);
                     return;
                 }
             }
@@ -256,22 +263,6 @@ namespace menu
         _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
     }
 
-    void print_edit_task(const Task &_parentTask, const size_t _index, size_t &_offset, const Task &_task, const TASK_STATE _state)
-    {
-        print_base(_parentTask, _index, _offset);
-
-        const size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
-
-        print_border_fg(_x, 1, terminal::panelWidth - 4, terminal::splitPanelHeight - 2);
-        terminal::print(_x, 0, "%^%*%wNew");
-
-        terminal::print(_x + 2, terminal::splitPanelHeight - 6, terminal::panelWidth - 8, 1                             , "%^%k{}   ", _horizontal     );
-
-        terminal::print(_x + 2, 1                             , terminal::panelWidth - 8, 1                             , "%^%*%k{}", _task.name       );
-        terminal::print(_x + 2, 3                             , terminal::panelWidth - 8, terminal::splitPanelHeight - 9, "%^%/%K{}", _task.description);
-        terminal::print(_x + 2, terminal::splitPanelHeight - 5                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute);
-        terminal::print(_x + 2, terminal::splitPanelHeight - 4                                                          , "%^%/%K{:04}/{:02}/{:02}-{:02}:{:02}", _task.endTime  .year, _task.endTime  .month, _task.endTime  .day, _task.endTime  .hour, _task.endTime  .minute);
-    }
     void edit_task(Task &_parentTask, const size_t _index, size_t &_offset)
     {
         TASK_STATE _state = TASK_STATE::NAME;
@@ -279,7 +270,8 @@ namespace menu
 
         while (true)
         {
-            print_edit_task(_parentTask, _index, _offset, _task, _state);
+            print_base(_parentTask, _index, _offset);
+            print_command("%^%*%wEdit", _parentTask.subtasks[_index], _task, _state);
             terminal::write();
 
             input::KEYBIND _input = input::read();
