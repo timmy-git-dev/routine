@@ -11,8 +11,8 @@ PATH_EXE="$PATH_BIN/output"
 
 # Set compile types.
 COMPILE_VERSION="-std=c++23"
-# COMPILE_FLAGS="-O3 -s -DNDEBUG -fomit-frame-pointer -funroll-loops"
-COMPILE_FLAGS="-g -O0 -fsanitize=address -fno-inline -fno-omit-frame-pointer"
+COMPILE_FLAGS="-O3 -s -DNDEBUG -fomit-frame-pointer -funroll-loops"
+# COMPILE_FLAGS="-g -O0 -fsanitize=address -fno-inline -fno-omit-frame-pointer"
 COMPILE_LIBRARIES=""
 
 # Re-create the object directory.
@@ -50,9 +50,9 @@ done
 PATHS_O=$(find "$PATH_OBJ" -type f -name "*.o")
 g++ $COMPILE_VERSION $COMPILE_FLAGS $COMPILE_LIBRARIES $PATHS_O -o $PATH_EXE
 
-BIN_DIR="$HOME/.local/bin"
+cd "$HOME"
+BIN_DIR=".local/bin"
 install -d "$BIN_DIR"
-install -m 755 "$PATH_EXE" "$BIN_DIR/scheduler"
+install -m 755 "$PATH_EXE" "$BIN_DIR/routine"
 
-echo "Built:"
-$BIN_DIR/scheduler
+$BIN_DIR/routine

@@ -114,7 +114,15 @@ namespace terminal
 
         while (_index < _text.size() && _row < _height)
         {
-            if (_text[_index] == '%')
+            if (_text[_index] == '\\')
+            {
+                if (++_index >= _text.size())
+                    break;
+
+                output += _text[_index++];
+                continue;
+            }
+            else if (_text[_index] == '%')
             {
                 if (_index + 1 >= _text.size())
                     break;

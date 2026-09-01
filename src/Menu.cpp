@@ -186,12 +186,12 @@ namespace menu
 
             switch (_input)
             {
-                case input::KEYBIND::NEW:     new_task(_task, _selectedSubtask, _offset);                                                                                                                                        break;
+                case input::KEYBIND::NEW:     new_task(_task, _selectedSubtask, _offset);                                                                                                             break;
                 case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask, _offset);                                                                           break;
                 case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
-                case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                           break;
+                case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                                           break;
                 case input::KEYBIND::PASTE:   insert_task(_task, copiedTask);                                                                                                                         break;
-                case input::KEYBIND::EXPORT:  if (_task.subtasks.size() > 0) data::csv("./routine/export.csv", _task.subtasks[_selectedSubtask]);                             break;
+                case input::KEYBIND::EXPORT:  if (_task.subtasks.size() > 0) data::csv("./routine/export.csv", _task.subtasks[_selectedSubtask]);                                                     break;
 
                 case input::KEYBIND::UP:      _selectedSubtask = _selectedSubtask == 0                         ? _task.subtasks.size() - 1 : _selectedSubtask - 1;                                    break;
                 case input::KEYBIND::DOWN:    _selectedSubtask = _selectedSubtask == _task.subtasks.size() - 1 ? 0                         : _selectedSubtask + 1;                                    break;
@@ -273,10 +273,21 @@ namespace menu
         _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
     }
 
+    void add_subtask_time(Task &_task, const Time &_time)
+    {
+        for (Task &_subtask : _task.subtasks)
+        {
+            _subtask.startTime.add_time(_time);
+            _subtask.endTime  .add_time(_time);
+            add_subtask_time(_subtask, _time);
+        }
+    }
+
     void edit_task(Task &_parentTask, const size_t _index, size_t &_offset)
     {
         TASK_STATE _state = TASK_STATE::NAME;
         Task       _task  = _parentTask.subtasks[_index];
+        Time       _prevTime = _task.startTime;
 
         while (true)
         {
@@ -304,6 +315,9 @@ namespace menu
                 case TASK_STATE::ENTER:
                 {
                     _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
+                    Time _timeChange = _task.startTime;
+                    _timeChange.sub_time(_prevTime);
+                    add_subtask_time(_task, _timeChange);
 
                     for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
                     {
