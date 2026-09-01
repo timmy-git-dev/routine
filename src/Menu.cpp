@@ -174,7 +174,7 @@ namespace menu
         {
             if (_task.startTime < _parentTask.subtasks[_i].startTime)
             {
-                _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, copiedTask);
+                _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _task);
                 return;
             }
         }
@@ -214,7 +214,7 @@ namespace menu
                 case input::KEYBIND::NEW:     new_task(_task, _selectedSubtask, _offset);                                                                                                             break;
                 case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask, _offset);                                                                           break;
                 case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
-                case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                                           break;
+                case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                           break;
                 case input::KEYBIND::PASTE:   insert_task(_task, copiedTask);                                                                                                                         break;
                 case input::KEYBIND::EXPORT:  if (_task.subtasks.size() > 0) data::csv("./routine/export.csv", _task.subtasks[_selectedSubtask]);                                                     break;
 
