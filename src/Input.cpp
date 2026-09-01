@@ -29,7 +29,7 @@ namespace input
             if (_sequence[0] == '[') return static_cast<KEYBIND>(_sequence[1] - 'A');
         }
 
-        else if (_char == '\n') return KEYBIND::CONFIRM;
+        else if (_char == '\n') return KEYBIND::ENTER;
         else if (_char == 0x7f || _char == 0x08) return KEYBIND::DELETE;
 
         return static_cast<KEYBIND>(_char);

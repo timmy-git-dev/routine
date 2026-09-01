@@ -9,6 +9,7 @@ namespace input
         EDIT   = 'e',
         COPY   = 'c',
         PASTE  = 'v',
+        EXPORT = 4,
 
         UP      = 0, // up-arrow.
         DOWN    = 1, // down-arrow.
@@ -16,7 +17,7 @@ namespace input
         NEXT    = 2, // right-arrow.
         BACK    = 3, // left-arrow.
 
-        CONFIRM = 4, // enter/newline.
+        ENTER   = 4, // enter/newline.
         DELETE  = 5, // delete/backspace.
 
 

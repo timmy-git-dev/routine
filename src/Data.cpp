@@ -1,7 +1,10 @@
 #include "Data.hpp"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <vector>
 #include "Task.hpp"
+#include "Time.hpp"
 
 namespace data
 {
@@ -90,14 +93,58 @@ namespace data
         }
     }
 
+    void print_csv(std::ofstream &_file, const Task &_task, size_t _indent)
+    {
+        _file << std::format
+        (
+            "task,\"{}\",\"{}\",,4,{},timmy (60412128),,{:04}/{:02}/{:02} {:02}:{:02},,,,,,\n",
+            _task.name          ,
+            _task.description   ,
+            _indent             ,
+            _task.startTime.year, _task.startTime.month, _task.startTime.day, _task.startTime.hour, _task.startTime.minute
+        );
+
+        ++_indent;
+        for (const Task &_subtask : _task.subtasks)
+        {
+            print_csv(_file, _subtask, _indent);
+        }
+    }
+
     void read (std::string _input , Task &_tasks)
     {
-        std::ifstream _file = std::ifstream(_input);
-        read_task(_file, _tasks);
+        if (std::filesystem::exists(_input))
+        {
+            std::ifstream _file = std::ifstream(_input);
+            read_task(_file, _tasks);
+            return;
+        }
+
+        _tasks = Task
+        {
+            .name        = "routine",
+            .description = "",
+            .status      = 0,
+            .subtasks    = std::vector<Task>(),
+            .startTime   = Time(),
+            .endTime     = Time(),
+        };
     }
     void write(std::string _output, Task &_tasks)
     {
+        std::filesystem::create_directories(std::filesystem::path(_output).parent_path());
         std::ofstream _file = std::ofstream(_output, std::ios::trunc);
         print_task(_file, _tasks);
+    }
+    void csv  (std::string _output, Task &_tasks)
+    {
+        std::ofstream _file = std::ofstream(_output, std::ios::trunc);
+        _file <<
+            "TYPE,CONTENT,DESCRIPTION,IS_COLLAPSED,PRIORITY,INDENT,AUTHOR,RESPONSIBLE,DATE,DATE_LANG,TIMEZONE,DURATION,DURATION_UNIT,DEADLINE,DEADLINE_LANG\n"
+            "meta,view_style=list,,,,,,,,,,,,,\n"
+            ",,,,,,,,,,,,,,\n";
+        print_csv(_file, _tasks, 1);
+        _file <<
+            ",,,,,,,,,,,,,,";
     }
 };

@@ -1,4 +1,5 @@
 #include "Menu.hpp"
+#include "Data.hpp"
 #include "Task.hpp"
 #include "Terminal.hpp"
 #include "Input.hpp"
@@ -32,7 +33,7 @@ namespace menu
         END_HOUR    ,
         END_MINUTE  ,
 
-        CONFIRM     ,
+        ENTER       ,
     };
 
     Task copiedTask;
@@ -43,7 +44,7 @@ namespace menu
         {
             case input::KEYBIND::UP:                                                 return MENU_CASE::STAY;
             case input::KEYBIND::DOWN:                                               return MENU_CASE::STAY;
-            case input::KEYBIND::CONFIRM:                                            return MENU_CASE::STAY;
+            case input::KEYBIND::ENTER:                                              return MENU_CASE::STAY;
 
             case input::KEYBIND::NEXT:                                               return MENU_CASE::NEXT;
             case input::KEYBIND::BACK:                                               return MENU_CASE::BACK;
@@ -190,6 +191,7 @@ namespace menu
                 case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
                 case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                           break;
                 case input::KEYBIND::PASTE:   insert_task(_task, copiedTask);                                                                                                                         break;
+                case input::KEYBIND::EXPORT:  if (_task.subtasks.size() > 0) data::csv("./routine/export.csv", _task.subtasks[_selectedSubtask]);                             break;
 
                 case input::KEYBIND::UP:      _selectedSubtask = _selectedSubtask == 0                         ? _task.subtasks.size() - 1 : _selectedSubtask - 1;                                    break;
                 case input::KEYBIND::DOWN:    _selectedSubtask = _selectedSubtask == _task.subtasks.size() - 1 ? 0                         : _selectedSubtask + 1;                                    break;
@@ -260,8 +262,8 @@ namespace menu
                 case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .month , _input, 1, 12     )); break;
                 case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .day   , _input, 1, 31     )); break;
                 case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .hour  , _input, 0, 23     )); break;
-                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
-                case TASK_STATE::CONFIRM:      insert_task(_parentTask, _newTask);                                                                                                   return;
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::ENTER) break;
+                case TASK_STATE::ENTER:        insert_task(_parentTask, _newTask);                                                                                                 return;
             }
         }
     }
@@ -298,8 +300,8 @@ namespace menu
                 case TASK_STATE::END_MONTH:    _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .month , _input, 1, 12     )); break;
                 case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .day   , _input, 1, 31     )); break;
                 case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .hour  , _input, 0, 23     )); break;
-                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
-                case TASK_STATE::CONFIRM:
+                case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_task.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::ENTER) break;
+                case TASK_STATE::ENTER:
                 {
                     _parentTask.subtasks.erase(_parentTask.subtasks.begin() + _index);
 
