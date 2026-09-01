@@ -7,6 +7,8 @@ namespace input
         NEW    = 'n',
         REMOVE = 'r',
         EDIT   = 'e',
+        COPY   = 'c',
+        PASTE  = 'v',
 
         UP      = 0, // up-arrow.
         DOWN    = 1, // down-arrow.

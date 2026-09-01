@@ -35,6 +35,8 @@ namespace menu
         CONFIRM     ,
     };
 
+    Task copiedTask;
+
     MENU_CASE edit_str(std::string &_str, input::KEYBIND _input)
     {
         switch (_input)
@@ -155,6 +157,21 @@ namespace menu
         }
     }
 
+    void insert_task(Task &_parentTask, Task &_task)
+    {
+        for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
+        {
+            if (_task.startTime < _parentTask.subtasks[_i].startTime)
+            {
+                _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, copiedTask);
+                return;
+            }
+        }
+
+        _parentTask.subtasks.push_back(_task);
+        return;
+    }
+
     void display_task(Task &_task)
     {
         size_t _selectedSubtask = 0;
@@ -169,10 +186,14 @@ namespace menu
             switch (_input)
             {
                 case input::KEYBIND::NEW:     new_task(_task, _selectedSubtask, _offset);                                                                                                                                        break;
-                case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask, _offset);                                                                                    break;
+                case input::KEYBIND::EDIT:    if (_task.subtasks.size() > 0) edit_task  (_task, _selectedSubtask, _offset);                                                                           break;
                 case input::KEYBIND::REMOVE:  if (_task.subtasks.size() > 0) remove_task(_task, _selectedSubtask); _selectedSubtask = std::clamp(_selectedSubtask, 0ul, _task.subtasks.size() - 1ul); break;
+                case input::KEYBIND::COPY :   if (_task.subtasks.size() > 0) copiedTask = _task.subtasks[_selectedSubtask];                                                                           break;
+                case input::KEYBIND::PASTE:   insert_task(_task, copiedTask);                                                                                                                         break;
+
                 case input::KEYBIND::UP:      _selectedSubtask = _selectedSubtask == 0                         ? _task.subtasks.size() - 1 : _selectedSubtask - 1;                                    break;
                 case input::KEYBIND::DOWN:    _selectedSubtask = _selectedSubtask == _task.subtasks.size() - 1 ? 0                         : _selectedSubtask + 1;                                    break;
+
                 case input::KEYBIND::NEXT:    if (_task.subtasks.size() > 0) display_task(_task.subtasks[_selectedSubtask]);                                                                          break;
                 case input::KEYBIND::BACK:                                                                                                                                                            return;
 
@@ -240,20 +261,7 @@ namespace menu
                 case TASK_STATE::END_DAY:      _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .day   , _input, 1, 31     )); break;
                 case TASK_STATE::END_HOUR:     _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .hour  , _input, 0, 23     )); break;
                 case TASK_STATE::END_MINUTE:   _state = (TASK_STATE)((int)_state + (int)edit_num(_newTask.endTime  .minute, _input, 0, 59     )); if (_state != TASK_STATE::CONFIRM) break;
-                case TASK_STATE::CONFIRM:
-                {
-                    for (size_t _i = 0; _i < _parentTask.subtasks.size(); ++_i)
-                    {
-                        if (_newTask.startTime < _parentTask.subtasks[_i].startTime)
-                        {
-                            _parentTask.subtasks.insert(_parentTask.subtasks.begin() + _i, _newTask);
-                            return;
-                        }
-                    }
-
-                    _parentTask.subtasks.push_back(_newTask);
-                    return;
-                }
+                case TASK_STATE::CONFIRM:      insert_task(_parentTask, _newTask);                                                                                                   return;
             }
         }
     }
