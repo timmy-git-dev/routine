@@ -164,7 +164,7 @@ namespace menu
         size_t _x = (terminal::panelWidth + terminal::gapWidth) * 2 + 2;
         size_t _y = terminal::splitPanelHeight + terminal::gapHeight;
 
-        terminal::print(_x, _y, "%^%*%wInfo");
+        terminal::print(_x, _y, "%^%*%wKeybinds");
         terminal::print(_x + 1, _y + 2, terminal::panelWidth - 6, terminal::splitPanelHeight - 4, _info);
     }
 
@@ -298,8 +298,8 @@ namespace menu
             .description = "description",
             .status      = 0,
             .subtasks    = std::vector<Task>(),
-            .startTime   = Time::now(),
-            .endTime     = Time::now(),
+            .startTime   = _parentTask.startTime,
+            .endTime     = _parentTask.endTime  ,
         };
         Task       _newTask = _oldTask;
         _newTask.name        = "";
